@@ -5,8 +5,11 @@ import java.util.*;
 public class Main {
 
 	public static void main(String[] args) throws FileNotFoundException {
-		String filename = "C:/Users/Admin/workspace/ComArch/src/sample.txt";
-        File file = new File(filename);
+		//read from text file
+		String currentDir = System.getProperty("user.dir");
+		currentDir = currentDir.replace("\\","/");
+		currentDir += "/src/sample.txt";
+        File file = new File(currentDir);
         Scanner sn = new Scanner(file);
 		int num = 0;
 		int i=0;
@@ -22,6 +25,7 @@ public class Main {
 		}
 	
 		System.out.println("Total line is: " + (num));
+		
 
 	}
 

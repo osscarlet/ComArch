@@ -1,4 +1,4 @@
-field1	field2	field3	field4	field5	field6
-field1	field2	field3	field4	field5	field6
-field1	field2	field3	field4	field5	field6
-field1	field2	field3	field4	field5	field6
+start add f0 f1 f2 comment
+ lw f0 f1 offset
+ jalr f0 f1
+noop

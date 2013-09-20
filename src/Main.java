@@ -1,5 +1,10 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -72,7 +77,7 @@ public class Main {
 	}
 	
 
-	public static void main(String[] args) throws FileNotFoundException {
+	public static void main(String[] args) throws IOException {
 		//read from text file
 		String currentDir = System.getProperty("user.dir");
 		currentDir = currentDir.replace("\\","/");
@@ -83,6 +88,7 @@ public class Main {
         int count=0;
         int con = 0;
         
+        ArrayList<String> finish = new ArrayList<String>();
         ArrayList<String> label = new ArrayList<String>();
 		while(sn.hasNextLine()) {
 			
@@ -260,70 +266,68 @@ public class Main {
 			if (arr[i][1].equalsIgnoreCase("add")){
 				arr[i][1] = "000";
 				txt = arr[i][1] + arr[i][2] + arr[i][3] + "0000000000000" + arr[i][4];
-				con++;
+				txt = String.valueOf(Integer.parseInt(txt, 2));
+				
 			}
 			else if (arr[i][1].equalsIgnoreCase("nand")){
 				arr[i][1] = "001";
 				txt = arr[i][1] + arr[i][2] + arr[i][3] + "0000000000000" + arr[i][4];
-				con++;
+				txt = String.valueOf(Integer.parseInt(txt, 2));
+				
 
 			}
 			else if (arr[i][1].equalsIgnoreCase("lw")){
 				arr[i][1] = "010";
 				txt = arr[i][1] + arr[i][2] + arr[i][3] + arr[i][4];
+				txt = String.valueOf(Integer.parseInt(txt, 2));
 				con++;
 			}
 			else if (arr[i][1].equalsIgnoreCase("sw")){
 				arr[i][1] = "011";
 				txt = arr[i][1] + arr[i][2] + arr[i][3] + arr[i][4];
+				txt = String.valueOf(Integer.parseInt(txt, 2));
 				con++;
 			}
 			else if (arr[i][1].equalsIgnoreCase("beq")){
 				arr[i][1] = "100";
 				txt = arr[i][1] + arr[i][2] + arr[i][3] + arr[i][4];
+				txt = String.valueOf(Integer.parseInt(txt, 2));
 				con++;
 			}
 			else if (arr[i][1].equalsIgnoreCase("jalr")){
 				arr[i][1] = "101";
 				txt = arr[i][1] + arr[i][2] + arr[i][3] + "0000000000000000";
+				txt = String.valueOf(Integer.parseInt(txt, 2));
 				con++;
 			}
 			else if (arr[i][1].equalsIgnoreCase("halt")){
 				arr[i][1] = "110";
 				txt = arr[i][1] + "0000000000000000000000";
+				txt = String.valueOf(Integer.parseInt(txt, 2));
 				con++;
+				
 			}
 			else if (arr[i][1].equalsIgnoreCase("noop")){
 				arr[i][1] = "111";
 				txt = arr[i][1] + "0000000000000000000000";
+				txt = String.valueOf(Integer.parseInt(txt, 2));
 				con++;
 			}
 			else if (arr[i][1].equalsIgnoreCase(".fill")){
 				txt = arr[i][2];
+				txt = String.valueOf((short)Integer.parseInt(txt, 2));
 			}
 			output.add(txt);
-			//System.out.println(txt);
-		}
-		
-		for(int i=0; i<con; i++){
-			int res = Integer.parseInt(output.get(i), 2);
-			System.out.println(res);
-		}
-		for(int i=con; i<output.size(); i++){	
-			short res = (short)Integer.parseInt(output.get(i), 2);
-			System.out.println(res);
+			
 		}
 		
 		
+		PrintWriter out = new PrintWriter(new FileWriter(System.getProperty("user.dir")+"\\src\\output.txt")); 
+		for (int i=0; i<output.size(); i++)
+		out.println(output.get(i));
+		out.close();
 		
-		/*for (int i=0; i<count; i++) {
-			System.out.println(i);
-			for (int j=0; j<6; j++)
-				System.out.print(arr[i][j]+" ");
-			System.out.println("\n");
-		}*/
-		
-		
+		System.out.println(System.getProperty("user.dir")+"\\output.txt");
 	}
 	
 }

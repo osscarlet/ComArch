@@ -5,6 +5,11 @@ import java.util.*;
 
 public class Main {
 	
+	public String decToTwoBin(int input) {
+		String c2 = Integer.toBinaryString(input);
+		return c2.substring(16, 32);
+	}
+	
 	public static void displayList(ArrayList<String> list) {
 		for (int j=0; j<list.size(); j++)
 			System.out.print(list.get(j)+" ");
@@ -73,9 +78,10 @@ public class Main {
 		currentDir += "/src/sample.txt";
         File file = new File(currentDir);
         Scanner sn = new Scanner(file);
-
-		
+        String[][] arr = new String[65536][7];
+        int count=0;
 		while(sn.hasNextLine()) {
+			
 			String line = sn.nextLine();
 			StringTokenizer strtok = new StringTokenizer(line); //create string tokenizer, slice by space
 	
@@ -86,12 +92,6 @@ public class Main {
 			
 			if(isInst(code.get(0))) {	
 				code.add(0, null);;
-				/*
-				for (int j=code.size()-1; j>0 ;j--) {
-					code.set(j, code.get(j-1));
-				}
-				code.set(0, null);
-				*/
 			}
 			
 			if (isRtype(code.get(1)) || isItype(code.get(1))) {
@@ -123,13 +123,109 @@ public class Main {
 					code.remove(3);
 				}
 				code.add(tmp);
+			} else { // Undefine case
+				code.removeAll(code);
+				count--;
+			}
+			//System.out.println(code.size());
+			for (int k=0; k<code.size(); k++)
+				arr[count][k]=(code.get(k));
+			
+			count++;
+			
+			//displayList(code);
+					
+			
+			
+		}
+		
+	    
+		//short res = (short)Integer.parseInt("1000000000000001", 2);
+		//System.out.println(res);
+		
+		
+		
+		for (int i=0; i<count; i++) {
+			System.out.println(i);
+			for (int j=0; j<6; j++)
+				System.out.print(arr[i][j]+" ");
+			System.out.println("\n");
+		}
+		
+		
+		for (int i=0; i<count; i++) {
+			
+		if (isRtype(arr[i][1])) {
+			int tmp = Integer.parseInt((String) arr[i][2]);
+			String c2 = Integer.toBinaryString(tmp | 0x10);
+			arr[i][2] = c2.substring(2, 5);
+			
+			tmp = Integer.parseInt((String) arr[i][3]);
+			c2 = Integer.toBinaryString(tmp | 0x10);
+			arr[i][3] = c2.substring(2, 5);
+			
+			tmp = Integer.parseInt((String) arr[i][4]);
+			c2 = Integer.toBinaryString(tmp | 0x10);
+			arr[i][4] = c2.substring(2, 5);
+				
+		} else if (isItype(arr[i][1])) {
+			int tmp = Integer.parseInt((String) arr[i][2]);
+			String c2 = Integer.toBinaryString(tmp | 0x10);
+			arr[i][2] = c2.substring(2, 5);
+			
+			tmp = Integer.parseInt((String) arr[i][3]);
+			c2 = Integer.toBinaryString(tmp | 0x10);
+			arr[i][3] = c2.substring(2, 5);
+			
+			int j=0;
+			for (j=0; j<count; j++) {
+				if (arr[j][0]!=null)
+					if(arr[i][4].equalsIgnoreCase(arr[j][0]))
+						break;
 			}
 			
 			
+			if (j==count) {
+				tmp = Integer.parseInt((String) arr[i][4]);
+				c2 = Integer.toBinaryString(tmp | 0x10);
+				arr[i][4] = c2.substring(2, 5);
+			} else {
+		
+				c2 = Integer.toBinaryString(j | 0x10000);
+				arr[i][4] = c2.substring(1, 17);
+			}
 			
-			displayList(code);
-					
-			System.out.println();		
 		}
+		
+			
+			// change opcode
+			if (arr[i][1].equalsIgnoreCase("add"))
+				arr[i][1] = "000";
+			else if (arr[i][1].equalsIgnoreCase("nand"))
+				arr[i][1] = "001";
+			else if (arr[i][1].equalsIgnoreCase("lw"))
+				arr[i][1] = "010";
+			else if (arr[i][1].equalsIgnoreCase("sw"))
+				arr[i][1] = "011";
+			else if (arr[i][1].equalsIgnoreCase("beq"))
+				arr[i][1] = "100";
+			else if (arr[i][1].equalsIgnoreCase("jalr"))
+				arr[i][1] = "101";
+			else if (arr[i][1].equalsIgnoreCase("halt"))
+				arr[i][1] = "110";
+			else if (arr[i][1].equalsIgnoreCase("noop"))
+				arr[i][1] = "111";
+		}
+		
+		
+		
+		for (int i=0; i<count; i++) {
+			System.out.println(i);
+			for (int j=0; j<6; j++)
+				System.out.print(arr[i][j]+" ");
+			System.out.println("\n");
+		}
+		
 	}
+	
 }

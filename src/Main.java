@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
+import java.util.regex.Pattern;
 
 
 public class Main {
@@ -80,7 +81,11 @@ public class Main {
         Scanner sn = new Scanner(file);
         String[][] arr = new String[65536][7];
         int count=0;
+        int con = 0;
+        
+        ArrayList<String> label = new ArrayList<String>();
 		while(sn.hasNextLine()) {
+			
 			
 			String line = sn.nextLine();
 			StringTokenizer strtok = new StringTokenizer(line); //create string tokenizer, slice by space
@@ -90,9 +95,21 @@ public class Main {
 				code.add(strtok.nextElement().toString());
 			}
 			
+			
 			if(isInst(code.get(0))) {	
-				code.add(0, null);;
+				code.add(0, null);
 			}
+			
+			if(code.get(0)!=null) {
+				if(label.contains(code.get(0))) {
+					System.out.println("Found duplicate label");
+					System.exit(1);
+				} else 
+					label.add(code.get(0));
+				
+				
+			}
+			
 			
 			if (isRtype(code.get(1)) || isItype(code.get(1))) {
 				String tmp = "";
@@ -126,6 +143,8 @@ public class Main {
 			} else { // Undefine case
 				code.removeAll(code);
 				count--;
+				System.out.println("Undefine Opcode");
+				System.exit(1);
 			}
 			//System.out.println(code.size());
 			for (int k=0; k<code.size(); k++)
@@ -139,20 +158,22 @@ public class Main {
 			
 		}
 		
+		
+		
 	    
 		//short res = (short)Integer.parseInt("1000000000000001", 2);
 		//System.out.println(res);
 		
 		
 		
-		for (int i=0; i<count; i++) {
+		/*for (int i=0; i<count; i++) {
 			System.out.println(i);
 			for (int j=0; j<6; j++)
 				System.out.print(arr[i][j]+" ");
 			System.out.println("\n");
-		}
+		}*/
 		
-		
+		ArrayList<String> output = new ArrayList<String>();
 		for (int i=0; i<count; i++) {
 			
 		if (isRtype(arr[i][1])) {
@@ -186,45 +207,122 @@ public class Main {
 			
 			
 			if (j==count) {
+				if (arr[i][4].matches("\\d+")) {
 				tmp = Integer.parseInt((String) arr[i][4]);
-				c2 = Integer.toBinaryString(tmp | 0x10);
-				arr[i][4] = c2.substring(2, 5);
+				c2 = Integer.toBinaryString(tmp | 0x10000);
+				arr[i][4] = c2.substring(1, 17);
+				}
+				else {
+					System.out.println("Found undefined label");
+					System.exit(1);
+				}
 			} else {
-		
+				if (j>32767 && j<-32768) {
+					System.out.println("Offset overflow");
+					System.exit(1);
+				}
+					
 				c2 = Integer.toBinaryString(j | 0x10000);
 				arr[i][4] = c2.substring(1, 17);
 			}
 			
+		} else if (isJtype(arr[i][1])) {
+			int tmp = Integer.parseInt((String) arr[i][2]);
+			String c2 = Integer.toBinaryString(tmp | 0x10);
+			arr[i][2] = c2.substring(2, 5);
+			
+			c2 = Integer.toBinaryString(i+1 | 0x10);
+			arr[i][3] = c2.substring(2, 5);
+		} else if (isFill(arr[i][1])) {
+			int j=0;
+			for (j=0; j<count; j++) {
+				if (arr[j][0]!=null)
+					if(arr[i][2].equalsIgnoreCase(arr[j][0]))
+						break;
+			}
+			
+			int tmp;
+			String c2;
+			if (j==count) {
+				tmp = Integer.parseInt((String) arr[i][2]);
+				c2 = Integer.toBinaryString(tmp | 0x10000);
+				arr[i][2] = c2.substring(1, 17);
+			} else {
+				c2 = Integer.toBinaryString(j | 0x10000);
+				arr[i][2] = c2.substring(1, 17);
+			}
 		}
 		
 			
 			// change opcode
-			if (arr[i][1].equalsIgnoreCase("add"))
+		
+		String txt = "null";
+			if (arr[i][1].equalsIgnoreCase("add")){
 				arr[i][1] = "000";
-			else if (arr[i][1].equalsIgnoreCase("nand"))
+				txt = arr[i][1] + arr[i][2] + arr[i][3] + "0000000000000" + arr[i][4];
+				con++;
+			}
+			else if (arr[i][1].equalsIgnoreCase("nand")){
 				arr[i][1] = "001";
-			else if (arr[i][1].equalsIgnoreCase("lw"))
+				txt = arr[i][1] + arr[i][2] + arr[i][3] + "0000000000000" + arr[i][4];
+				con++;
+
+			}
+			else if (arr[i][1].equalsIgnoreCase("lw")){
 				arr[i][1] = "010";
-			else if (arr[i][1].equalsIgnoreCase("sw"))
+				txt = arr[i][1] + arr[i][2] + arr[i][3] + arr[i][4];
+				con++;
+			}
+			else if (arr[i][1].equalsIgnoreCase("sw")){
 				arr[i][1] = "011";
-			else if (arr[i][1].equalsIgnoreCase("beq"))
+				txt = arr[i][1] + arr[i][2] + arr[i][3] + arr[i][4];
+				con++;
+			}
+			else if (arr[i][1].equalsIgnoreCase("beq")){
 				arr[i][1] = "100";
-			else if (arr[i][1].equalsIgnoreCase("jalr"))
+				txt = arr[i][1] + arr[i][2] + arr[i][3] + arr[i][4];
+				con++;
+			}
+			else if (arr[i][1].equalsIgnoreCase("jalr")){
 				arr[i][1] = "101";
-			else if (arr[i][1].equalsIgnoreCase("halt"))
+				txt = arr[i][1] + arr[i][2] + arr[i][3] + "0000000000000000";
+				con++;
+			}
+			else if (arr[i][1].equalsIgnoreCase("halt")){
 				arr[i][1] = "110";
-			else if (arr[i][1].equalsIgnoreCase("noop"))
+				txt = arr[i][1] + "0000000000000000000000";
+				con++;
+			}
+			else if (arr[i][1].equalsIgnoreCase("noop")){
 				arr[i][1] = "111";
+				txt = arr[i][1] + "0000000000000000000000";
+				con++;
+			}
+			else if (arr[i][1].equalsIgnoreCase(".fill")){
+				txt = arr[i][2];
+			}
+			output.add(txt);
+			//System.out.println(txt);
+		}
+		
+		for(int i=0; i<con; i++){
+			int res = Integer.parseInt(output.get(i), 2);
+			System.out.println(res);
+		}
+		for(int i=con; i<output.size(); i++){	
+			short res = (short)Integer.parseInt(output.get(i), 2);
+			System.out.println(res);
 		}
 		
 		
 		
-		for (int i=0; i<count; i++) {
+		/*for (int i=0; i<count; i++) {
 			System.out.println(i);
 			for (int j=0; j<6; j++)
 				System.out.print(arr[i][j]+" ");
 			System.out.println("\n");
-		}
+		}*/
+		
 		
 	}
 	
